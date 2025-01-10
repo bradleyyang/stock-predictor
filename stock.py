@@ -6,6 +6,7 @@ from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
+from sklearn.ensemble import RandomForestRegressor
 
 load_dotenv()
 
@@ -25,6 +26,7 @@ X = history_scaled.drop(columns=['Target'])
 y = history_scaled['Target']
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1)
 
+# Linear regression model
 model = LinearRegression()
 model.fit(X_train, y_train)
 
@@ -32,3 +34,14 @@ y_pred_lr = model.predict(X_test)
 lr_mse = mean_squared_error(y_test, y_pred_lr)
 print(f"Linear Regression Baseline MSE: {lr_mse}")
 
+# Random forest model
+rf_model = RandomForestRegressor(n_estimators=100, random_state=42)
+rf_model.fit(X_train, y_train)
+
+y_pred_rf = rf_model.predict(X_test)
+rf_mse = mean_squared_error(y_test, y_pred_rf)
+print(f"Random forest mse: {rf_mse}")
+
+
+
+# Training the model
