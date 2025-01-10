@@ -1,6 +1,4 @@
 # Building a stock predictor prototype
-You need an alpha vantage api key. Get one here at https://www.alphavantage.co/support/#api-key
-
 To install the dependencies
 
 > pip install -r requirements.txt
@@ -12,7 +10,7 @@ source venv/bin/activate
 ```
 
 Run this app with
-> python3 stockpredictor.py
+> python3 stock.py
 
 
 
