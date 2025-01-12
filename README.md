@@ -10,7 +10,7 @@ source venv/bin/activate
 ```
 
 Run this app with
-> python3 sklearnstock.py
+> python3 stockpredictor.py
 
 
 
