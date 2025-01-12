@@ -8,45 +8,43 @@ from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.ensemble import RandomForestRegressor
 import matplotlib.pyplot as plt
 
-def get_stock_history(ticker):
-    return yf.Ticker(ticker).history(start="2000-01-01", end="2025-01-01", interval="1d", actions=False)
+def get_stockprices(ticker):
+    return yf.Ticker(ticker).history(period='5d', interval="1m", actions=False)
 
-history = get_stock_history("AAPL")
+stockprices = get_stockprices("AAPL")
 
 scaler = preprocessing.MinMaxScaler()
-columns_to_scale = ['Open', 'High', 'Low', 'Close', 'Volume']
-history_scaled = pd.DataFrame(scaler.fit_transform(history[columns_to_scale]), columns=columns_to_scale, index=history.index)
+stockprices.drop(axis=1, columns=['Open', 'High', 'Low', 'Volume'], inplace=True)
+columns_to_scale = ['Close']
+stockprices_scaled = pd.DataFrame(scaler.fit_transform(stockprices[['Close']]), columns=['Close'], index=stockprices.index)
 
-history_scaled['Target'] = history_scaled['Close'].shift(-1)
-history_scaled = history_scaled.dropna()
+stockprices_scaled['Target'] = stockprices_scaled['Close'].shift(-1)
+stockprices_scaled = stockprices_scaled.dropna()
 
-X = history_scaled.drop(columns=['Target'])
-y = history_scaled['Target']
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1)
+X = stockprices_scaled[['Close']]
+y = stockprices_scaled['Target']
+
+train_ratio = 0.8
+train_size = int(len(stockprices_scaled) * train_ratio)
+
+X_train = X[:train_size]
+X_test = X[train_size:]
+y_train = y[:train_size]
+y_test = y[train_size:]
 
 # Linear regression model
-model = LinearRegression()
-model.fit(X_train, y_train)
+lr_model = LinearRegression()
+lr_model.fit(X_train, y_train)
 
-y_pred_lr = model.predict(X_test)
+y_pred_lr = lr_model.predict(X_test)
 lr_mse = mean_squared_error(y_test, y_pred_lr)
 lr_r2 = r2_score(y_test, y_pred_lr)
 print(f"Linear Regression Baseline MSE: {lr_mse}")
 print(f"Linear regression R-squared value is: {lr_r2}")
 
-# Random forest model
-rf_model = RandomForestRegressor(n_estimators=100, random_state=42)
-rf_model.fit(X_train, y_train)
-
-y_pred_rf = rf_model.predict(X_test)
-rf_mse = mean_squared_error(y_test, y_pred_rf)
-print(f"Random forest mse: {rf_mse}")
-
-
-# Training the model
-
-
-
-
-
-
+y_pred_lr = np.array(y_pred_lr).reshape(-1, 1)
+y_pred_unscaled = scaler.inverse_transform(y_pred_lr)
+y_test = np.array(y_test).reshape(-1, 1)
+y_test_unscaled = scaler.inverse_transform(y_test)
+mse = mean_squared_error(y_test_unscaled, y_pred_unscaled)
+print(f"stock price predictions mse: {mse}")
