@@ -43,7 +43,6 @@ rf_mse = mean_squared_error(y_test, y_pred_rf)
 print(f"Random forest mse: {rf_mse}")
 
 
-
 # Training the model
 
 

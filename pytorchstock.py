@@ -8,3 +8,4 @@ stockprices = yf.Ticker(ticker).history(period="1d", interval="1m", actions=Fals
 stockprices['Target'] = stockprices['Close'].shift(-1)
 stockprices = stockprices.dropna()
 
+print(stockprices)
