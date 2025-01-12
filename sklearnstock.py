@@ -1,4 +1,3 @@
-from dotenv import load_dotenv
 import pandas as pd
 import numpy as np
 import yfinance as yf
@@ -8,8 +7,6 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.ensemble import RandomForestRegressor
 import matplotlib.pyplot as plt
-
-load_dotenv()
 
 def get_stock_history(ticker):
     return yf.Ticker(ticker).history(start="2000-01-01", end="2025-01-01", interval="1d", actions=False)
@@ -25,7 +22,7 @@ history_scaled = history_scaled.dropna()
 
 X = history_scaled.drop(columns=['Target'])
 y = history_scaled['Target']
-X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.8, test_size=0.2, random_state=1)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1)
 
 # Linear regression model
 model = LinearRegression()
@@ -50,10 +47,7 @@ print(f"Random forest mse: {rf_mse}")
 # Training the model
 
 
-# Visualizing
-plt.figure(figsize=(10, 6))
-plt.plot(y_test.index, y_test, label="Actual")
-plt.plot(y_test.index, y_pred_lr, label="linear regression predicted model", linestyle="--")
-plt.legend()
-plt.title("Model Predictions vs. Actual")
-plt.show()
+
+
+
+
