@@ -8,7 +8,4 @@ To install the dependencies
 
 > pip install -r requirements.txt
 
-Run this app with
-> python3 stockpredictor.py
-
 Note: This will only work if you have Python 3.8-3.11

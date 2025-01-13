@@ -8,7 +8,7 @@ from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.ensemble import RandomForestRegressor
 import matplotlib.pyplot as plt
 
-from tensorflow.python.keras import Sequential
+from tensorflow.python.keras.models import Sequential
 from keras.src.layers import Dense, Dropout, LSTM
 
 
