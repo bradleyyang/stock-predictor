@@ -1,22 +1,20 @@
-from typing import Union
 from fastapi import FastAPI, HTTPException
 from utils import get_stock, get_predictions
-from fastapi.responses import JSONResponse
 
 app = FastAPI()
 
 @app.get("/stockprices/{stock}")
-def read_stockprices(stock: str):
+def read_stockprices(ticker: str, data_periods: str, data_intervals: str, prediction_periods: int, prediction_intervals: str):
     try:
-        stock_data = get_stock(stock, "1mo", "1d")
+        stock_data = get_stock(ticker, data_periods, data_intervals)
         if stock_data is None:
             return {"error": "stock data is none"}
         if stock_data.empty:
             return {"error": "No data found for stock"}
-        predictions = get_predictions(10, "B", stock_data)
+        predictions = get_predictions(prediction_periods, prediction_intervals, stock_data)
         if predictions is None:
             return {"error": "predictions is none"}
-        return {"stock": stock, "predictions": predictions}
+        return {"stock": ticker, "predictions": predictions}
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:

@@ -1,8 +1,6 @@
 import pandas as pd
 from prophet import Prophet
 import yfinance as yf
-import numpy as np
-from prophet.plot import plot_plotly, plot_components_plotly
 
 def get_stock(ticker: str, period: str, interval: str):
     try:
