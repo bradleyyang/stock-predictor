@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 from tensorflow.python.keras import Sequential
 from keras.src.layers import Dense, Dropout, LSTM
 
+
 def stochastic_oscillator(data: pd.DataFrame, period=14):
     highs = data['High']
     lows = data['Low']
@@ -21,27 +22,34 @@ def stochastic_oscillator(data: pd.DataFrame, period=14):
     slow_k = fast_k.rolling(window=3).mean()
     return fast_k, slow_k
 
+
 def calculate_macd(prices: pd.Series, short_window=12, long_window=26, signal_window=9):
-    short_ema = prices.ewm(span=short_window, min_periods=short_window, adjust=False).mean()
-    long_ema = prices.ewm(span=long_window, min_periods=long_window, adjust=False).mean()
+    short_ema = prices.ewm(
+        span=short_window, min_periods=short_window, adjust=False).mean()
+    long_ema = prices.ewm(
+        span=long_window, min_periods=long_window, adjust=False).mean()
     macd_line = short_ema - long_ema
-    signal_line = macd_line.ewm(span=signal_window, min_periods=signal_window, adjust=False).mean()
+    signal_line = macd_line.ewm(
+        span=signal_window, min_periods=signal_window, adjust=False).mean()
     return macd_line, signal_line
 
+
 def calculate_rsi(prices: pd.Series, period=14):
-  delta = prices.diff()
-  delta = delta.dropna()  
-  up, down = delta.clip(lower=0), delta.clip(upper=0, lower=None)  
-  ema_up = up.ewm(alpha=1/period, min_periods=period).mean() 
-  ema_down = down.abs().ewm(alpha=1/period, min_periods=period).mean()
-  rs = ema_up / ema_down  
-  rsi = 100 - 100 / (1 + rs)
-  return rsi
+    delta = prices.diff()
+    delta = delta.dropna()
+    up, down = delta.clip(lower=0), delta.clip(upper=0, lower=None)
+    ema_up = up.ewm(alpha=1/period, min_periods=period).mean()
+    ema_down = down.abs().ewm(alpha=1/period, min_periods=period).mean()
+    rs = ema_up / ema_down
+    rsi = 100 - 100 / (1 + rs)
+    return rsi
+
 
 def get_stockprices(ticker):
     return yf.Ticker(ticker).history(period='10y', interval="1wk", actions=False)
 
 # ================================================================================
+
 
 stockprices = get_stockprices("BMO")
 stockprices = stockprices.astype(float)
@@ -59,11 +67,12 @@ stockprices['slow_k'] = slow_k
 
 stockprices['Close_Lagged'] = stockprices['Close'].shift(1)
 stockprices['Return'] = stockprices['Close'] / stockprices['Close_Lagged'] - 1
-stockprices['ROC'] = stockprices['Close'].pct_change(periods=5) 
+stockprices['ROC'] = stockprices['Close'].pct_change(periods=5)
 
 stockprices['Target'] = stockprices['Close'].shift(-1)
 stockprices.dropna(inplace=True)
-features = ['High', 'Low', 'Close', 'Open', 'RSI', 'MACD', 'Volume', 'CMA', 'EMA', 'signal_line', 'fast_k', 'slow_k', 'Close_Lagged', 'Return', 'ROC']
+features = ['High', 'Low', 'Close', 'Open', 'RSI', 'MACD', 'Volume', 'CMA',
+            'EMA', 'signal_line', 'fast_k', 'slow_k', 'Close_Lagged', 'Return', 'ROC']
 # features = ['High', 'Low', 'Close', 'Open', 'Volume', 'Close_Lagged', 'Return', 'ROC']
 
 train_ratio = 0.8
