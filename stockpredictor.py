@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from tensorflow.python.keras import Sequential
 from keras.src.layers import Dense, Dropout, LSTM
 
-def stochastic_oscillator(data, period=14):
+def stochastic_oscillator(data: pd.DataFrame, period=14):
     highs = data['High']
     lows = data['Low']
     closes = data['Close']
@@ -21,14 +21,14 @@ def stochastic_oscillator(data, period=14):
     slow_k = fast_k.rolling(window=3).mean()
     return fast_k, slow_k
 
-def calculate_macd(prices, short_window=12, long_window=26, signal_window=9):
+def calculate_macd(prices: pd.Series, short_window=12, long_window=26, signal_window=9):
     short_ema = prices.ewm(span=short_window, min_periods=short_window, adjust=False).mean()
     long_ema = prices.ewm(span=long_window, min_periods=long_window, adjust=False).mean()
     macd_line = short_ema - long_ema
     signal_line = macd_line.ewm(span=signal_window, min_periods=signal_window, adjust=False).mean()
     return macd_line, signal_line
 
-def calculate_rsi(prices, period=14):
+def calculate_rsi(prices: pd.Series, period=14):
   delta = prices.diff()
   delta = delta.dropna()  
   up, down = delta.clip(lower=0), delta.clip(upper=0, lower=None)  
