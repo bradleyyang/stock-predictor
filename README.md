@@ -2,7 +2,7 @@
 Setup a virtual environment with
 ```
 python3 -m venv .venv
-source venv/bin/activate
+source .venv/bin/activate
 ```
 To install the dependencies
 
@@ -10,3 +10,5 @@ To install the dependencies
 
 Run this app with
 > python3 stockpredictor.py
+
+Note: This will only work if you have Python 3.8-3.11
