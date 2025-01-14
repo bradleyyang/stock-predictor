@@ -1,16 +1,9 @@
 import pandas as pd
-import numpy as np
 import yfinance as yf
 from sklearn import preprocessing
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.ensemble import RandomForestRegressor
 import matplotlib.pyplot as plt
-
-from tensorflow.python.keras.models import Sequential
-from keras.src.layers import Dense, Dropout, LSTM
-
 
 def stochastic_oscillator(data: pd.DataFrame, period=14):
     highs = data['High']
@@ -22,7 +15,6 @@ def stochastic_oscillator(data: pd.DataFrame, period=14):
     slow_k = fast_k.rolling(window=3).mean()
     return fast_k, slow_k
 
-
 def calculate_macd(prices: pd.Series, short_window=12, long_window=26, signal_window=9):
     short_ema = prices.ewm(
         span=short_window, min_periods=short_window, adjust=False).mean()
@@ -32,7 +24,6 @@ def calculate_macd(prices: pd.Series, short_window=12, long_window=26, signal_wi
     signal_line = macd_line.ewm(
         span=signal_window, min_periods=signal_window, adjust=False).mean()
     return macd_line, signal_line
-
 
 def calculate_rsi(prices: pd.Series, period=14):
     delta = prices.diff()
@@ -44,40 +35,37 @@ def calculate_rsi(prices: pd.Series, period=14):
     rsi = 100 - 100 / (1 + rs)
     return rsi
 
-
-def download_stockprices(ticker):
-    data = yf.Ticker(ticker).history(period='10y', interval="1d", actions=False)
+def download_stockprices(ticker="TSLA", period="10y", interval="1d"):
+    data = yf.Ticker(ticker).history(period=period, interval=interval, actions=False)
     data.to_csv(f"{ticker}_historical_data.csv")
 
-def get_stockprices_from_csv(ticker):
+def get_stockprices_from_csv(ticker: str = "TSLA") -> pd.DataFrame:
     return pd.DataFrame(pd.read_csv(f"{ticker}_historical_data.csv"))
 
 # ================================================================================
 
-stockprices = get_stockprices_from_csv("TSLA")
+stockprices = get_stockprices_from_csv()
 stockprices.set_index('Date', inplace=True)
 stockprices = stockprices.astype(float)
 
-# Calculating features
+macd_line, signal_line = calculate_macd(stockprices['Close'])
+fast_k, slow_k = stochastic_oscillator(stockprices)
+features = ['High', 'Low', 'Close', 'Open', 'RSI', 'MACD', 'Volume', 'CMA',
+            'EMA', 'signal_line', 'fast_k', 'slow_k', 'Close_Lagged', 'Return', 'ROC']
+
 stockprices['CMA'] = stockprices['Close'].expanding().mean()
 stockprices['EMA'] = stockprices['Close'].ewm(span=5).mean()
 stockprices['RSI'] = calculate_rsi(stockprices['Close'])
-macd_line, signal_line = calculate_macd(stockprices['Close'])
 stockprices['MACD'] = macd_line
 stockprices['signal_line'] = signal_line
-fast_k, slow_k = stochastic_oscillator(stockprices)
 stockprices['fast_k'] = fast_k
 stockprices['slow_k'] = slow_k
-
 stockprices['Close_Lagged'] = stockprices['Close'].shift(1)
 stockprices['Return'] = stockprices['Close'] / stockprices['Close_Lagged'] - 1
 stockprices['ROC'] = stockprices['Close'].pct_change(periods=5)
-
 stockprices['Target'] = stockprices['Close'].shift(-1)
+
 stockprices.dropna(inplace=True)
-features = ['High', 'Low', 'Close', 'Open', 'RSI', 'MACD', 'Volume', 'CMA',
-            'EMA', 'signal_line', 'fast_k', 'slow_k', 'Close_Lagged', 'Return', 'ROC']
-# features = ['High', 'Low', 'Close', 'Open', 'Volume', 'Close_Lagged', 'Return', 'ROC']
 
 train_ratio = 0.8
 train_size = int(len(stockprices[features]) * train_ratio)
@@ -96,7 +84,6 @@ y_scaler = preprocessing.MinMaxScaler()
 y_train_scaled = y_scaler.fit_transform(y_train.values.reshape(-1, 1))
 y_test_scaled = y_scaler.transform(y_test.values.reshape(-1, 1))
 
-
 baseline_model = RandomForestRegressor(n_estimators=50, random_state=42, oob_score=True)
 baseline_model.fit(X_train, y_train)
 y_pred_baseline = baseline_model.predict(X_test)
@@ -108,10 +95,8 @@ print(f"MSE: {mse}")
 print(f"r2: {r2}")
 print(f"OOB score: {oob_score}")
 
-# y_pred_baseline_series = pd.Series(y_pred_baseline, index=y_test.index)
-# y_pred_baseline_series.plot(label="predicted")
-# y_test.plot(label="actual")
-# plt.legend()
-# plt.show()
-
-# LSTM
+y_pred_baseline_series = pd.Series(y_pred_baseline, index=y_test.index)
+y_pred_baseline_series.plot(label="predicted")
+y_test.plot(label="actual")
+plt.legend()
+plt.show()
