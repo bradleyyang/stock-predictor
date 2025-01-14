@@ -5,6 +5,7 @@ import numpy as np
 import yfinance as yf
 from sklearn import preprocessing
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 import tensorflow as tf
 from keras._tf_keras.keras.layers import Dense, LSTM
 from keras._tf_keras.keras.models import Sequential
@@ -80,9 +81,13 @@ predicted_value = scaler.inverse_transform(prediction)
 print(f"Predicted Value (Original Scale): {predicted_value[0][0]}")
 
 # Predictions for future data
-seed: List[float]  = test_data[-seq_length:].flatten().tolist()
-
 num_predictions = 10
+
+historical_prices = data['Close']
+last_date = historical_prices.index[-1]
+future_dates = pd.date_range(start=last_date, periods=num_predictions + 1, freq='D')[1:]
+
+seed: List[float]  = test_data[-seq_length:].flatten().tolist()
 
 future_predictions = []
 for i in range(num_predictions):
@@ -91,14 +96,37 @@ for i in range(num_predictions):
     future_predictions.append(yhat)
     seed.append(yhat)
 
-print("Future predictions (scaled):", future_predictions)
+future_predictions_scaled = np.array(future_predictions).reshape(-1, 1)
+future_predictions_original = scaler.inverse_transform(future_predictions_scaled)
 
-future_predictions_original = scaler.inverse_transform(np.array(future_predictions).reshape(-1, 1))
-print("Future predictions (original scale):", future_predictions_original.flatten())
+predicted_prices = pd.Series(future_predictions_original.flatten(), index=future_dates)
 
-plt.plot(range(len(future_predictions_original)), future_predictions_original, label='Future Predictions')
-plt.xlabel('Time Steps')
+historical_prices.index = pd.to_datetime(historical_prices.index)
+predicted_prices.index = pd.to_datetime(predicted_prices.index)
+
+plt.plot(historical_prices.index, historical_prices, label="Historical prices", color="blue")
+plt.plot(predicted_prices.index, predicted_prices, label="Predicted prices", color="red", linestyle="--")
+plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+plt.gca().xaxis.set_major_locator(mdates.AutoDateLocator())
+plt.xlabel('Date')
 plt.ylabel('Stock Price')
-plt.title('Future Stock Price Predictions')
+plt.title('Stock Price History and Future Predictions')
 plt.legend()
+plt.xticks(rotation=45)
 plt.show()
+
+
+
+
+# Plotting future predictions only
+# print("Future predictions (scaled):", future_predictions)
+
+# future_predictions_original = scaler.inverse_transform(np.array(future_predictions).reshape(-1, 1))
+# print("Future predictions (original scale):", future_predictions_original.flatten())
+
+# plt.plot(range(len(future_predictions_original)), future_predictions_original, label='Future Predictions')
+# plt.xlabel('Time Steps')
+# plt.ylabel('Stock Price')
+# plt.title('Future Stock Price Predictions')
+# plt.legend()
+# plt.show()
