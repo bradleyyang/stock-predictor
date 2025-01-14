@@ -2,29 +2,19 @@ import math
 from typing import List
 import pandas as pd
 import numpy as np
-import yfinance as yf
 from sklearn import preprocessing
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-import tensorflow as tf
 from keras._tf_keras.keras.layers import Dense, LSTM
 from keras._tf_keras.keras.models import Sequential
 from keras._tf_keras.keras.callbacks import History
+from Stockprices import *
 
-def download_stockprices(ticker="TSLA", period="10y", interval="1d"):
-    data = yf.Ticker(ticker).history(period=period, interval=interval, actions=False)
-    data.to_csv(f"{ticker}_historical_data.csv")
-
-def get_stockprices_from_csv(ticker: str = "TSLA") -> pd.DataFrame:
-    return pd.DataFrame(pd.read_csv(f"{ticker}_historical_data.csv"))
-
-# ================================================================================
-
-data = get_stockprices_from_csv()
+data = get_stockprices_from_csv("TSLA")
 data.set_index('Date', inplace=True)
-data = data.astype(float)
 
 data.drop(axis=1, columns=['High', 'Low', 'Volume', 'Open'], inplace=True)
+data = data.astype(float)
 data.dropna(inplace=True)
 
 train_ratio = 0.8
@@ -115,8 +105,6 @@ plt.title('Stock Price History and Future Predictions')
 plt.legend()
 plt.xticks(rotation=45)
 plt.show()
-
-
 
 
 # Plotting future predictions only
