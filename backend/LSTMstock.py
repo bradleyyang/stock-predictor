@@ -46,7 +46,7 @@ def calculate_rsi(prices: pd.Series, period=14):
 
 
 def get_stockprices(ticker):
-    return yf.Ticker(ticker).history(period='10y', interval="1wk", actions=False)
+    return yf.Ticker(ticker).history(period='10y', interval="1d", actions=False)
 
 # ================================================================================
 
@@ -93,14 +93,16 @@ y_train_scaled = y_scaler.fit_transform(y_train.values.reshape(-1, 1))
 y_test_scaled = y_scaler.transform(y_test.values.reshape(-1, 1))
 
 
-baseline_model = RandomForestRegressor()
+baseline_model = RandomForestRegressor(n_estimators=50, random_state=42, oob_score=True)
 baseline_model.fit(X_train, y_train)
 y_pred_baseline = baseline_model.predict(X_test)
 
 mse = mean_squared_error(y_test, y_pred_baseline)
 r2 = r2_score(y_test, y_pred_baseline)
+oob_score = baseline_model.oob_score_
 print(f"MSE: {mse}")
 print(f"r2: {r2}")
+print(f"OOB score: {oob_score}")
 
 y_pred_baseline_series = pd.Series(y_pred_baseline, index=y_test.index)
 y_pred_baseline_series.plot(label="predicted")
