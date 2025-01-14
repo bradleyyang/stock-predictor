@@ -63,22 +63,23 @@ history : History = model.fit(X_train, y_train, epochs=5, batch_size=32, verbose
 # plt.xlabel('Epoch')
 # plt.show()
 
-trainScore = model.evaluate(X_train, y_train, verbose=0)
-print('Train score: %.2f MSE (%.2f RMSE)' % (trainScore, math.sqrt(trainScore)))
-testScore = model.evaluate(X_test, y_test, verbose=0)
-print('Test Score: %.2f MSE (%.2f RMSE)' % (testScore, math.sqrt(testScore)))
+# Evaluating MSE and RMSE
+# trainScore = model.evaluate(X_train, y_train, verbose=0)
+# print('Train score: %.2f MSE (%.2f RMSE)' % (trainScore, math.sqrt(trainScore)))
+# testScore = model.evaluate(X_test, y_test, verbose=0)
+# print('Test Score: %.2f MSE (%.2f RMSE)' % (testScore, math.sqrt(testScore)))
 
 # Evaluating loss
-loss = model.evaluate(X_test, y_test)
-print(f"Loss: {loss}")
+# loss = model.evaluate(X_test, y_test)
+# print(f"Loss: {loss}")
 
 # Evaluating model
-example = test_data[-seq_length:]
-example = example.reshape((1, seq_length, 1))
-prediction = model.predict(example)
-print(f"Scaled predicted value: {prediction[0][0]}")
-predicted_value = scaler.inverse_transform(prediction)
-print(f"Predicted Value (Original Scale): {predicted_value[0][0]}")
+# example = test_data[-seq_length:]
+# example = example.reshape((1, seq_length, 1))
+# prediction = model.predict(example)
+# print(f"Scaled predicted value: {prediction[0][0]}")
+# predicted_value = scaler.inverse_transform(prediction)
+# print(f"Predicted Value (Original Scale): {predicted_value[0][0]}")
 
 # Predictions for future data
 num_predictions = 10
@@ -120,7 +121,6 @@ plt.show()
 
 # Plotting future predictions only
 # print("Future predictions (scaled):", future_predictions)
-
 # future_predictions_original = scaler.inverse_transform(np.array(future_predictions).reshape(-1, 1))
 # print("Future predictions (original scale):", future_predictions_original.flatten())
 
