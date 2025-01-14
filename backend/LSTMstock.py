@@ -45,13 +45,17 @@ def calculate_rsi(prices: pd.Series, period=14):
     return rsi
 
 
-def get_stockprices(ticker):
-    return yf.Ticker(ticker).history(period='10y', interval="1d", actions=False)
+def download_stockprices(ticker):
+    data = yf.Ticker(ticker).history(period='10y', interval="1d", actions=False)
+    data.to_csv(f"{ticker}_historical_data.csv")
+
+def get_stockprices_from_csv(ticker):
+    return pd.DataFrame(pd.read_csv(f"{ticker}_historical_data.csv"))
 
 # ================================================================================
 
-
-stockprices = get_stockprices("BMO")
+stockprices = get_stockprices_from_csv("TSLA")
+stockprices.set_index('Date', inplace=True)
 stockprices = stockprices.astype(float)
 
 # Calculating features
@@ -104,10 +108,10 @@ print(f"MSE: {mse}")
 print(f"r2: {r2}")
 print(f"OOB score: {oob_score}")
 
-y_pred_baseline_series = pd.Series(y_pred_baseline, index=y_test.index)
-y_pred_baseline_series.plot(label="predicted")
-y_test.plot(label="actual")
-plt.legend()
-plt.show()
+# y_pred_baseline_series = pd.Series(y_pred_baseline, index=y_test.index)
+# y_pred_baseline_series.plot(label="predicted")
+# y_test.plot(label="actual")
+# plt.legend()
+# plt.show()
 
 # LSTM
